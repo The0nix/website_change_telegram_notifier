@@ -1,0 +1,10 @@
+chat_id: 012345678  # chat_id in telegram
+poll_interval: 5.  # Interval between checks in seconds
+url: "https://www.exitfest.org/en/tickets"  # URL to check
+init_notification: True  # Whether to send a message to chat_id on startup
+debug: False  # Send a notification on each check
+search_queries:  # selectors to check
+  - selector: '.product__main:contains("Glamping tent for 2 persons")'
+    not_contains: 'sold-out'
+  - selector: '.product__main:contains("Pre-pitched tent for 2 persons")'
+    contains: 'sold-out'
