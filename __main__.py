@@ -8,6 +8,7 @@ from typing import TextIO
 import click
 import lxml.etree
 import pyquery
+import requests
 import telegram_notifier as tn
 import yaml
 
@@ -63,6 +64,12 @@ def main(config_file: TextIO):
     try:
         LOGGER.info('Start checking')
         while True:
+            try:
+                results = check_url
+            except requests.exceptions.ReadTimeout:
+                logger.error('ReadTimeout')
+                time.sleep(poll_iterval)
+                continue
             if results := check_url(url, search_queries):
                 for result in results:
                     message = f'Selector\n> {result.selector}\n{result.action}\n> {result.item}\non url\n> {url}'
@@ -72,8 +79,11 @@ def main(config_file: TextIO):
                 tn.send_message(DEBUG_MESSAGE)
             time.sleep(poll_interval)
     except KeyboardInterrupt:
+        LOGGER.info('Keyboard interrupt')
         tn.send_message(f'Stopped monitoring {url}')
-        LOGGER.info('Shutting down')
+    except Exception as e:
+        tn.send_message(f'Stopped monitoring {url} because of exception {e}')
+        raise
 
 if __name__ == '__main__':
     main()  # type: ignore
